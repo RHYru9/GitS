@@ -1,4 +1,4 @@
-module github.com/RHYru9/GitS
+module github.com/RHYru9/GitSD
 
 go 1.18
 
