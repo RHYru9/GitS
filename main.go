@@ -2,14 +2,11 @@ package main
 
 import (
 	"bufio"
-	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	"strings"
-
 	"net/url"
-
 	"github.com/fatih/color"
 )
 
@@ -101,15 +98,13 @@ func processDomains(filePath string) ([]string, error) {
 }
 
 func main() {
-	filePath := flag.String("l", "", "File containing list of domains")
-	flag.Parse()
-
-	if *filePath == "" {
-		fmt.Println("Usage: gitsd -l <file containing list of domains>")
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: gitsd <file containing list of domains>")
 		return
 	}
 
-	vulnerableDomains, err := processDomains(*filePath)
+	filePath := os.Args[1]
+	vulnerableDomains, err := processDomains(filePath)
 	if err != nil {
 		fmt.Println("Error reading file:", err)
 		return
