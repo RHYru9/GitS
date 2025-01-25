@@ -101,7 +101,7 @@ func processDomains(filePath string) ([]string, error) {
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: go run main.go -l <file containing list of domains>")
+		fmt.Println("Usage: gitsd -l <file containing list of domains>")
 		return
 	}
 
