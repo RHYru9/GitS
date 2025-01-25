@@ -1,4 +1,4 @@
-module github.com/RHYru9/GitSleuth
+module github.com/RHYru9/GitS
 
 go 1.18
 
