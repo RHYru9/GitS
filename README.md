@@ -18,12 +18,12 @@ go install github.com/RHYru9/GitSD@latest
 
 ## Usage
 ```bash
-Usage: gitsd -l <file containing list of domains>
+Usage: gitsd <file containing list of domains>
 ```
 
 ### Example
 ```bash
-gitsd -l urls.txt
+gitsd urls.txt
 ```
 
 ## Scanned Paths
