@@ -100,8 +100,16 @@ func checkPath(domain string) bool {
 	vulnerable := false
 	for _, path := range paths {
 		targetURL := parsedDomain.Scheme + "://" + parsedDomain.Host + path
-		resp, err := client.Get(targetURL)
-		
+		req, err := http.NewRequest("GET", targetURL, nil)
+		if err != nil {
+			color.Red("[+] %-60s|\terror\t\t | %v", targetURL, err)
+			continue
+		}
+
+		// Add a custom User-Agent header
+		req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; GitSD/1.0)")
+
+		resp, err := client.Do(req)
 		if err != nil {
 			if strings.Contains(err.Error(), "timeout") {
 				color.Yellow("[+] %-60s|\ttimeout\t\t | skipping", targetURL)
