@@ -105,7 +105,7 @@ func checkPath(domain string) bool {
 		return false
 	}
 
-	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; GitSD/1.0)")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:133.0) Gecko/20100101 Firefox/133.0")
 	resp, err := client.Do(req)
 	
 	if err != nil {
