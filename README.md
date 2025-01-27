@@ -4,7 +4,7 @@
 GitSD is a Go-based tool designed to scan domains for Git source code disclosure vulnerabilities. It checks for exposed Git configuration and log files that might reveal sensitive project information.
 
 ## ✨ Features
-- 🔍 Scan multiple domains from a list
+- 🔍 Scan a list of domains
 - 🕸️ Check for common Git-related exposed paths
 
 ## 🛠 Prerequisites
