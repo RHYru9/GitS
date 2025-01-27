@@ -7,10 +7,6 @@ GitSD is a Go-based tool designed to scan domains for Git source code disclosure
 - 🔍 Scan a list of domains
 - 🕸️ Check for common Git-related exposed paths
 
-## 🛠 Prerequisites
-- 🐹 Go 1.x
-- 📦 `github.com/fatih/color` package
-
 ## 💻 Installation
 ```bash
 go install github.com/RHYru9/GitSD@latest
