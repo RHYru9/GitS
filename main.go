@@ -97,8 +97,31 @@ func checkPath(domain string) bool {
 		},
 	}
 
-	vulnerable := false
-	for _, path := range paths {
+	firstPath := paths[0]
+	targetURL := parsedDomain.Scheme + "://" + parsedDomain.Host + firstPath
+	req, err := http.NewRequest("GET", targetURL, nil)
+	if err != nil {
+		color.Red("[+] %-60s|\terror\t\t | %v", targetURL, err)
+		return false
+	}
+
+	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; GitSD/1.0)")
+	resp, err := client.Do(req)
+	
+	if err != nil {
+		if strings.Contains(err.Error(), "timeout") {
+			color.Yellow("[+] %-60s|\ttimeout\t\t | skipping entire domain", targetURL)
+			return false
+		}
+		color.Red("[+] %-60s|\terror\t\t | %v", targetURL, err)
+		return false
+	}
+	
+	defer resp.Body.Close()
+	
+	vulnerable := processPathResponse(targetURL, resp)
+	
+	for _, path := range paths[1:] {
 		targetURL := parsedDomain.Scheme + "://" + parsedDomain.Host + path
 		req, err := http.NewRequest("GET", targetURL, nil)
 		if err != nil {
@@ -106,9 +129,7 @@ func checkPath(domain string) bool {
 			continue
 		}
 
-		// Add a custom User-Agent header
 		req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; GitSD/1.0)")
-
 		resp, err := client.Do(req)
 		if err != nil {
 			if strings.Contains(err.Error(), "timeout") {
@@ -120,39 +141,46 @@ func checkPath(domain string) bool {
 		}
 		
 		defer resp.Body.Close()
-		statusText := getStatusText(resp.StatusCode)
-
-		// Handle redirects
-		if resp.StatusCode >= 300 && resp.StatusCode < 400 {
-			color.Yellow("[+] %-60s|\t%-15s\t | Status code: %d", targetURL, statusText, resp.StatusCode)
-			continue
-		}
-
-		if resp.StatusCode == 200 {
-			bodyBytes, err := io.ReadAll(resp.Body)
-			if err != nil {
-				color.Red("[+] %-60s|\terror reading\t | %v", targetURL, err)
-				continue
-			}
-			
-			content := string(bodyBytes)
-			
-			if isHTML(content) {
-				color.Yellow("[+] %-60s|\tHTML content\t | Status code: %d", targetURL, resp.StatusCode)
-				continue
-			}
-
-			if checkVulnerability(content) {
-				color.Green("[+] %-60s|\tvulnerable\t | Status code: %d", targetURL, resp.StatusCode)
-				vulnerable = true
-			} else {
-				color.Yellow("[+] %-60s|\tnot vulnerable\t | Status code: %d", targetURL, resp.StatusCode)
-			}
-		} else {
-			color.Yellow("[+] %-60s|\t%-15s\t | Status code: %d", targetURL, statusText, resp.StatusCode)
+		if processPathResponse(targetURL, resp) {
+			vulnerable = true
 		}
 	}
+	
 	return vulnerable
+}
+
+func processPathResponse(targetURL string, resp *http.Response) bool {
+	statusText := getStatusText(resp.StatusCode)
+	
+	if resp.StatusCode >= 300 && resp.StatusCode < 400 {
+		color.Yellow("[+] %-60s|\t%-15s\t | Status code: %d", targetURL, statusText, resp.StatusCode)
+		return false
+	}
+
+	if resp.StatusCode == 200 {
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			color.Red("[+] %-60s|\terror reading\t | %v", targetURL, err)
+			return false
+		}
+		
+		content := string(bodyBytes)
+		
+		if isHTML(content) {
+			color.Yellow("[+] %-60s|\tHTML content\t | Status code: %d", targetURL, resp.StatusCode)
+			return false
+		}
+
+		if checkVulnerability(content) {
+			color.Green("[+] %-60s|\tvulnerable\t | Status code: %d", targetURL, resp.StatusCode)
+			return true
+		} else {
+			color.Yellow("[+] %-60s|\tnot vulnerable\t | Status code: %d", targetURL, resp.StatusCode)
+		}
+	} else {
+		color.Yellow("[+] %-60s|\t%-15s\t | Status code: %d", targetURL, statusText, resp.StatusCode)
+	}
+	return false
 }
 
 func processDomains(filePath string) ([]string, error) {
